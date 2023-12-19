@@ -8,9 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.navArgs
+import com.example.news.R
 import com.example.news.databinding.FragmentArticleBinding
 import com.example.news.db.ArticleDatabase
 import com.example.news.model.Articles
@@ -18,6 +17,7 @@ import com.example.news.repository.NewsRepository
 import com.example.news.utils.Constants
 import com.example.news.viewmodels.NewsViewModel
 import com.example.news.viewmodels.NewsViewModelProviderFactory
+import com.google.android.material.snackbar.Snackbar
 
 class ArticleFragment : Fragment() {
     private var _binding: FragmentArticleBinding? = null
@@ -29,7 +29,7 @@ class ArticleFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentArticleBinding.inflate(inflater, container, false)
+        _binding = com.example.news.databinding.FragmentArticleBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -50,6 +50,16 @@ class ArticleFragment : Fragment() {
             article?.url?.let {
                 loadUrl(article.url)
             }
+        }
+
+        binding.saveFab.setOnClickListener {
+            binding.saveFab.setIconResource(R.drawable.baseline_favorite_24)
+            article?.let { it1 -> viewModel.saveArticle(it1) }
+            Snackbar.make(
+                view,
+                "The article is successfully saved",
+                Snackbar.LENGTH_SHORT
+            ).show()
         }
     }
 
