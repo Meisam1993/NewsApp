@@ -1,6 +1,5 @@
 package com.example.news.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +13,10 @@ class NewsViewModel(
     private val newsRepository: NewsRepository
 ) : ViewModel() {
     val breakingNewsLiveData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    val breakingNewsPageNumber = 1
+    private val breakingNewsPageNumber = 1
+
+    val searchNewsLiveData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    private val searchNewsPageNumber = 1
 
     init {
         getBreakingNews("us")
@@ -26,7 +28,25 @@ class NewsViewModel(
         breakingNewsLiveData.postValue(handleBreakingNewsResponse(response))
     }
 
+    fun searchNews(searchQuery: String) = viewModelScope.launch {
+        searchNewsLiveData.postValue(Resource.Loading())
+        val response = newsRepository.searchForNews(searchQuery, searchNewsPageNumber)
+        searchNewsLiveData.postValue(handleSearchForNewsResponse(response))
+    }
+
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        if (response.isSuccessful) {
+            response.body()?.let {
+                return Resource.Success(it)
+            }
+        }
+        return Resource.Error(response.message())
+    }
+
+    private fun handleSearchForNewsResponse(
+        response: Response<NewsResponse>
+    )
+            : Resource<NewsResponse> {
         if (response.isSuccessful) {
             response.body()?.let {
                 return Resource.Success(it)
