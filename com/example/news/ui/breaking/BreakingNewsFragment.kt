@@ -9,12 +9,15 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.news.R
 import com.example.news.adapters.NewsAdapter
 import com.example.news.databinding.FragmentBreakingNewsBinding
 import com.example.news.db.ArticleDatabase
 import com.example.news.model.Articles
 import com.example.news.repository.NewsRepository
+import com.example.news.utils.Constants.Companion.ARTICLE_KEY
 import com.example.news.utils.Resource
 import com.example.news.viewmodels.NewsViewModel
 import com.example.news.viewmodels.NewsViewModelProviderFactory
@@ -95,6 +98,11 @@ class BreakingNewsFragment : Fragment(), NewsAdapter.OnArticleClickListener {
     }
 
     override fun onClick(articles: Articles) {
-        TODO("Not yet implemented")
+        val bundle = Bundle().apply {
+            putParcelable(ARTICLE_KEY, articles)
+        }
+        findNavController().navigate(
+            R.id.action_breaking_news_to_articleFragment, bundle
+        )
     }
 }
