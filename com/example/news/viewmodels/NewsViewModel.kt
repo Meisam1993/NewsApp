@@ -14,10 +14,12 @@ class NewsViewModel(
     private val newsRepository: NewsRepository
 ) : ViewModel() {
     val breakingNewsLiveData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    private val breakingNewsPageNumber = 1
+    var breakingNewsPageNumber = 1
+    private var breakingNewsResponse: NewsResponse? = null
 
     val searchNewsLiveData: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    private val searchNewsPageNumber = 1
+    var searchNewsPageNumber = 1
+    private var searchNewsResponse: NewsResponse? = null
 
     init {
         getBreakingNews("us")
@@ -48,8 +50,18 @@ class NewsViewModel(
 
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
         if (response.isSuccessful) {
-            response.body()?.let {
-                return Resource.Success(it)
+            response.body()?.let { resultResponse ->
+                breakingNewsPageNumber++
+                if (breakingNewsResponse == null) {
+                    breakingNewsResponse = resultResponse
+                } else {
+                    val oldArticles = breakingNewsResponse?.articles
+                    val newArticles = resultResponse.articles
+                    if (newArticles != null) {
+                        oldArticles?.addAll(newArticles)
+                    }
+                }
+                return Resource.Success(breakingNewsResponse ?: resultResponse)
             }
         }
         return Resource.Error(response.message())
@@ -60,8 +72,17 @@ class NewsViewModel(
     )
             : Resource<NewsResponse> {
         if (response.isSuccessful) {
-            response.body()?.let {
-                return Resource.Success(it)
+            response.body()?.let { resultResponse ->
+                searchNewsPageNumber++
+                if (searchNewsResponse == null) {
+                    searchNewsResponse = resultResponse
+                    val oldArticles = searchNewsResponse?.articles
+                    val newArticles = resultResponse.articles
+                    if (newArticles !== null) {
+                        oldArticles?.addAll(newArticles)
+                    }
+                }
+                return Resource.Success(searchNewsResponse ?: resultResponse)
             }
         }
         return Resource.Error(response.message())
